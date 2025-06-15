@@ -3,11 +3,7 @@ BEGIN;
 
 	WITH new_register AS (
 	  INSERT INTO users (username, email,rol,password)
-<<<<<<< HEAD
-	  VALUES ('HARSUE', 'HARWINGMR@GMAIL.COM','superadmin','$argon2id$v=19$m=65536,t=3,p=4$sr+pkKUTFRsQ2oDT1cRZ8A$X+7bgXsqrUBccVR8WiXmO2ITVCNps/BPyP/bxBGl8y0')
-=======
 	  VALUES ('HARSUE', 'HARWINGMR@GMAIL.COM','superadmin','RELAMPAGOARRASA')
->>>>>>> 147ca99600ffaf02067ed69480dd9120e5fd12f0
 	  RETURNING id
 	)
 	SELECT SET_CONFIG('app.user_id', id::TEXT, true)

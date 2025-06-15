@@ -1,9 +1,5 @@
 from app.db.repositories import UserRepository
-<<<<<<< HEAD
 from app.schemas.user import UserResponse,UserRequest,UserUpdate
-=======
-from app.schemas.user import UserResponse
->>>>>>> 147ca99600ffaf02067ed69480dd9120e5fd12f0
 
 class UserService:
     def __init__(self):
@@ -20,7 +16,6 @@ class UserService:
             rol=user_db.rol
         )
         return user_response
-<<<<<<< HEAD
     
     def create_user(self,user_request: UserRequest) -> UserResponse | None:
         user = self.repo.create_user(user_request=user_request)
@@ -60,6 +55,3 @@ class UserService:
             return None
         
         return True
-=======
-        
->>>>>>> 147ca99600ffaf02067ed69480dd9120e5fd12f0
