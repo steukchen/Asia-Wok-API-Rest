@@ -1,4 +1,4 @@
-from pydantic import BaseModel,field_validator,ConfigDict
+from pydantic import BaseModel,field_validator
 from app.utils import validate_email,hash_password
 
 class UserResponse(BaseModel):

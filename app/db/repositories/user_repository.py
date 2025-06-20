@@ -51,7 +51,6 @@ class UserRepository:
         user_update = user_update.model_dump()
         try:
             for property,value in user_update.items():
-                print(getattr(user,property))
                 if value is not None:
                     setattr(user,property,value)
             session.commit()
