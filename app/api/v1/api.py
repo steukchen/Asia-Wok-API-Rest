@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import user,table
+from .endpoints import user,table,dish
 
 from app.models import insert_data_test
 
@@ -13,3 +13,4 @@ def data_test():
 
 api_router.include_router(user.router,prefix="/users",tags=["USERS"])
 api_router.include_router(table.router,prefix="/tables",tags=["TABLES"])
+api_router.include_router(dish.router,prefix="/dishes",tags=["DISHES"])

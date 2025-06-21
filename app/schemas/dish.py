@@ -1,0 +1,90 @@
+from pydantic import BaseModel,field_validator
+
+class DishTypeResponse(BaseModel):
+    id: int
+    name: str
+    
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "id": 1,
+                    "name": "BEBIDA"
+                }
+            }
+    }
+    
+
+class DishTypeRequest(BaseModel):
+    name: str
+    
+    @field_validator("name")
+    def validate_name(cls, value: str) -> str:
+        value =value.upper()
+        
+        if len(value) <= 4:
+            raise ValueError("The name must be longer than 4 characters.")
+        
+        return value
+    
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "name": "BEBIDA",
+                }
+            }
+    }
+
+class DishResponse(BaseModel):
+    id: int
+    name: str
+    description: str = None
+    price: float
+    type_id: int
+    
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "id": 1,
+                    "name": "Chop Suey",
+                    "description":"Comida muy rica asiatica",
+                    "price": 2.45,
+                    "type_id": 1
+                }
+            }
+    }
+
+class DishRequest(BaseModel):
+    name: str
+    description: str = None
+    price: float
+    type_id: int
+    
+    @field_validator("name")
+    def validate_name(cls, value: str) -> str:
+        value = value.upper()
+        
+        if len(value) <= 4:
+            raise ValueError("The name must be longer than 4 characters.")
+        
+        return value
+    
+    @field_validator("price")
+    def validate_price(cls,value: float) -> float:
+        if value <= 0:
+            raise ValueError("The price mush be greather than 0")
+        return value
+    
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "name": "Coca Cola",
+                    "description":"Chop Suey",
+                    "price": 2.45,
+                    "type_id": 1
+                }
+            }
+    }
