@@ -46,6 +46,6 @@ class TableService:
         table_deleted = self.repo.delete_table(id=id)
         
         if not table_deleted:
-            return None
+            return False
         
         return True

@@ -2,9 +2,9 @@
 BEGIN; 
 
 	WITH new_register AS (
-	  INSERT INTO users (username, email,rol,password)
-	  VALUES ('HARSUE', 'HARWINGMR@GMAIL.COM','superadmin','RELAMPAGOARRASA')
-	  RETURNING id
+		INSERT INTO users (username, email,rol,password)
+		VALUES ('HARSUE', 'HARWINGMR@GMAIL.COM','superadmin','RELAMPAGOARRASA')
+		RETURNING id
 	)
 	SELECT SET_CONFIG('app.user_id', id::TEXT, true)
 	FROM new_register;

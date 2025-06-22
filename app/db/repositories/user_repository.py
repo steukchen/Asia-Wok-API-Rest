@@ -3,43 +3,41 @@ from app.schemas.user import UserRequest,UserUpdate
 from sqlalchemy.orm import Session
 from app.db import session
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from typing import List
 
 class UserRepository:
     
     @session
-    def get_user_by_username(self,session: Session,username:str) -> User:
-        try:
-            query = select(User).where(User.username == username)
-            user = session.execute(query).one()
-            return user[0]
-        except Exception as e:
-            print(e)
+    def get_users(self,session: Session) -> List[User] | None:
+        query = select(User)
+        users = session.execute(query).all()
+        if not users:
+            return None
+        users = [user[0] for user in users]
+        return users
+    @session
+    def get_user_by_username(self,session: Session,username:str) -> User | None:
+        query = select(User).where(User.username == username)
+        user = session.execute(query).fetchone()
+        if not user:
+            return None
+            
+        return user[0]
         
-        return None
     
     
     @session
-    def create_user(self,session: Session, user_request: UserRequest) ->  User | None:
+    def create_user(self,session: Session, user_request: UserRequest) ->  User:
         user_db = User(
                 username=user_request.username,
                 email=user_request.email,
                 rol=user_request.rol,
                 password=user_request.password
             )
-
-        try:
-            session.add(user_db)
-            session.commit()
-            
-            user = self.get_user_by_username(session=session,username=user_request.username)
-            
-            return user
-        except IntegrityError as e:
-            session.rollback()
-            print(e)
         
-        return None
+        session.add(user_db)
+        return user_db
+        
     
     @session
     def update_user(self,session: Session, user_update: UserUpdate, username: str) -> User | None:
@@ -49,34 +47,18 @@ class UserRepository:
             return None
         
         user_update = user_update.model_dump()
-        try:
-            for property,value in user_update.items():
-                if value is not None:
-                    setattr(user,property,value)
-            session.commit()
-            session.flush()
-            user = self.get_user_by_username(session=session,username=user.username)
-            return user
-        except IntegrityError as e:
-            session.rollback()
-            print(e)
         
-        return None
+        for property,value in user_update.items():
+            if value is not None:
+                setattr(user,property,value)
+
+        return user
+        
     
     @session
     def delete_user(self,session: Session, username: str) -> bool:
         user = self.get_user_by_username(session=session,username=username)
         
-        if not user:
-            return False
-        
-        try:
+        if user:
             session.delete(user)
-            session.commit()
-            
-            return True
-        except IntegrityError as e:
-            session.rollback()
-            print(e)
-        
-        return False
+        return user is not None

@@ -43,6 +43,6 @@ class DishService:
         dish_type_deleted = self.repo.delete_dish_type(id=id)
         
         if not dish_type_deleted:
-            return None
+            return False
         
         return True
