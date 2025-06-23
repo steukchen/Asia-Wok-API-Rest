@@ -1,13 +1,15 @@
-from app.db.repositories import DishRepository
+from app.db.repositories import DishTypeRepository
 from typing import List
 from app.schemas.dish import DishTypeRequest,DishTypeResponse
+from .base_service import BaseService
 
-class DishService:
+class DishTypeService(BaseService):
     def __init__(self):
-        self.repo = DishRepository()
+        self.repo = DishTypeRepository()
+        self.response = DishTypeResponse
     
     def get_dishes_types(self) -> List[DishTypeResponse]:
-        dishes_types_db = self.repo.get_dishes_types()
+        dishes_types_db = self.repo.get_all()
         if not dishes_types_db:
             return None
         dishes_types_response = [DishTypeResponse(
@@ -17,7 +19,7 @@ class DishService:
         return dishes_types_response
     
     def create_dish_type(self,dish_type_request: DishTypeRequest) -> DishTypeResponse | None:
-        dish_type = self.repo.create_dish_type(dish_type_request=dish_type_request)
+        dish_type = self.repo.create_one(data=dish_type_request)
         
         if not dish_type:
             return None
@@ -28,7 +30,7 @@ class DishService:
         )
     
     def update_dish_type(self,dish_type_update: DishTypeRequest, id: int):
-        dish_type = self.repo.update_dish_type(dish_type_update=dish_type_update,id=id)
+        dish_type = self.repo.update_one_by_column_primary(data=dish_type_update,value=id)
         
         if not dish_type:
             return None
@@ -40,7 +42,7 @@ class DishService:
         
     def delete_dish_type(self,id: int) -> bool:
         
-        dish_type_deleted = self.repo.delete_dish_type(id=id)
+        dish_type_deleted = self.repo.delete_one_by_column_primary(value=id)
         
         if not dish_type_deleted:
             return False

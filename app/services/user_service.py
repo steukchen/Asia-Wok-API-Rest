@@ -7,7 +7,7 @@ class UserService:
         self.repo = UserRepository()
         
     def get_users(self) -> List[UserResponse]:
-        users_db = self.repo.get_users()
+        users_db = self.repo.get_all()
         if not users_db:
             return None
         
@@ -21,7 +21,7 @@ class UserService:
         return users_response
     
     def get_user_by_username(self,username:str) -> UserResponse:
-        user_db = self.repo.get_user_by_username(username=username)
+        user_db = self.repo.get_one_by_column(column="username",value=username)
         if not user_db:
             return None
         user_response = UserResponse(
@@ -33,7 +33,7 @@ class UserService:
         return user_response
     
     def create_user(self,user_request: UserRequest) -> UserResponse | None:
-        user = self.repo.create_user(user_request=user_request)
+        user = self.repo.create_one(data=user_request)
         
         if user:
             return UserResponse(
@@ -46,7 +46,8 @@ class UserService:
     
     def update_user(self,user_update: UserUpdate, username: str):
         username = username.upper()
-        user = self.repo.update_user(user_update=user_update,username=username)
+        user = self.repo.update_one_by_column_primary(data=user_update,value=username)
+        
         
         if not user:
             return None
@@ -62,6 +63,6 @@ class UserService:
     def delete_user(self,username: str) -> bool:
         username = username.upper()
         
-        is_user_deleted = self.repo.delete_user(username=username)
+        is_user_deleted = self.repo.delete_one_by_column_primary(value=username)
         
         return is_user_deleted

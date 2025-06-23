@@ -7,7 +7,7 @@ class TableService:
         self.repo = TableRepository()
     
     def get_tables(self,) -> List[TableResponse]:
-        tables_db = self.repo.get_tables()
+        tables_db = self.repo.get_all()
         if not tables_db:
             return None
         tables_response = [TableResponse(
@@ -18,7 +18,7 @@ class TableService:
         return tables_response
     
     def create_table(self,table_request: TableRequest) -> TableResponse | None:
-        table = self.repo.create_table(table_request=table_request)
+        table = self.repo.create_one(data=table_request)
         
         if not table:
             return None
@@ -30,7 +30,7 @@ class TableService:
         )
     
     def update_table(self,table_update: TableUpdate, id: int):
-        table = self.repo.update_table(table_update=table_update,id=id)
+        table = self.repo.update_one_by_column_primary(value=id,data=table_update)
         
         if not table:
             return None
@@ -43,7 +43,7 @@ class TableService:
         
     def delete_table(self,id: int) -> bool:
         
-        table_deleted = self.repo.delete_table(id=id)
+        table_deleted = self.repo.delete_one_by_column_primary(value=id)
         
         if not table_deleted:
             return False
