@@ -7,6 +7,10 @@ class UserResponse(BaseModel):
     email: str
     rol: str
     
+    @field_validator("id",mode="before")
+    def validate_id(cls,value):
+        return str(value)
+
     model_config = {
         "json_schema_extra":
             {

@@ -1,37 +1,13 @@
 from app.db.repositories import UserRepository
 from app.schemas.user import UserResponse,UserRequest,UserUpdate
 from typing import List
+from .base_service import BaseService
 
-class UserService:
+class UserService(BaseService):
     def __init__(self):
         self.repo = UserRepository()
-        
-    def get_users(self) -> List[UserResponse]:
-        users_db = self.repo.get_all()
-        if not users_db:
-            return None
-        
-        users_response = [UserResponse(
-            id=str(user_db.id),
-            username=user_db.username,
-            email=user_db.email,
-            rol=user_db.rol
-        ) for user_db in users_db]
-        
-        return users_response
-    
-    def get_user_by_username(self,username:str) -> UserResponse:
-        user_db = self.repo.get_one_by_column(column="username",value=username)
-        if not user_db:
-            return None
-        user_response = UserResponse(
-            id=str(user_db.id),
-            username=user_db.username,
-            email=user_db.email,
-            rol=user_db.rol
-        )
-        return user_response
-    
+        self.response = UserResponse
+
     def create_user(self,user_request: UserRequest) -> UserResponse | None:
         user = self.repo.create_one(data=user_request)
         

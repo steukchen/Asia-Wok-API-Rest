@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get("/get_tables",status_code=status.HTTP_200_OK)
 def get_tables(service: TableService = Depends()) -> List[TableResponse]:
-    tables_response = service.get_tables()
+    tables_response = service.get_all()
     
     if not tables_response:
         raise HTTPException(detail=f"Tables not found",status_code=status.HTTP_404_NOT_FOUND)
@@ -17,7 +17,7 @@ def get_tables(service: TableService = Depends()) -> List[TableResponse]:
 
 @router.post("/create_table",status_code=status.HTTP_201_CREATED)
 def create_table(table_request: TableRequest, service: TableService = Depends()):
-    table = service.create_table(table_request=table_request)
+    table = service.create_one(item_request=table_request)
     
     if not table:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Table not Created")
@@ -26,7 +26,7 @@ def create_table(table_request: TableRequest, service: TableService = Depends())
 
 @router.put("/update_table/{id}",status_code=status.HTTP_200_OK)
 def update_table(table_update: TableUpdate,id: int = Path(), service: TableService = Depends()):
-    table = service.update_table(id=id,table_update=table_update)
+    table = service.update_one_by_column_primary(value=id,item_update=table_update)
     
     if not table:
         raise HTTPException(detail=f"Table not found",status_code=status.HTTP_404_NOT_FOUND)
@@ -35,7 +35,7 @@ def update_table(table_update: TableUpdate,id: int = Path(), service: TableServi
 
 @router.delete("/delete_table/{id}",status_code=status.HTTP_200_OK)
 def delete_table(id: int = Path(), service: TableService = Depends()):
-    table_deleted = service.delete_table(id=id)
+    table_deleted = service.delete_one(value=id)
     
     if not table_deleted:
         raise HTTPException(detail=f"Table not found",status_code=status.HTTP_404_NOT_FOUND)

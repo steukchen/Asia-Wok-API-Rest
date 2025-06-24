@@ -1,17 +1,18 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Enum,TIMESTAMP,Column,text,INTEGER
+from sqlalchemy import Enum,TIMESTAMP,text,INTEGER
+from sqlalchemy.orm import Mapped,mapped_column
 from ..db.session import engine,SessionLocal
 
 DeclarativeBase = declarative_base()
 
 class Base(DeclarativeBase):
     __abstract__ = True
-    created_at = Column(TIMESTAMP(timezone=True),nullable=False,server_default=text("NOW()"))
-    updated_at = Column(TIMESTAMP(timezone=True),nullable=False,server_default=text("NOW()"))
+    created_at: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP(timezone=True),nullable=False,server_default=text("NOW()"))
+    updated_at: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP(timezone=True),nullable=False,server_default=text("NOW()"))
 
 class BaseID(Base):
     __abstract__ = True
-    id = Column(INTEGER,primary_key=True,autoincrement=True)
+    id: Mapped[int] = mapped_column(INTEGER,primary_key=True,autoincrement=True)
 
 roles = Enum('superadmin','admin','chef','waiter',name="roles")
 states_tables = Enum('enabled','disabled','occupied','reserved',name="states_tables")
