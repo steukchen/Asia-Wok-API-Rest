@@ -1,8 +1,16 @@
-from pydantic import BaseModel,field_validator
+from pydantic import BaseModel,field_validator#,field_serializer
+# from datetime import datetime
 
 class DishTypeResponse(BaseModel):
     id: int
     name: str
+    # created_at: datetime
+    # updated_at: datetime
+    
+    # @field_serializer("created_at","updated_at")
+    # def serialize_created_at(self,value: datetime):
+    #     print(value)
+    #     return value.strftime("%d/%m/%Y, %H:%M:%S")
     
     model_config = {
         "json_schema_extra":

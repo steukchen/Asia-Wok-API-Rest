@@ -42,7 +42,9 @@ class CustomerRequest(BaseModel):
     
     @field_validator("name","lastname")
     def validate_name(cls,value:str):
-        print(cls)
+        value = value.upper()
+        if len(value) < 4:
+            raise ValueError("Name and Lastname must be more than 4 characters.")
         return value
 
     @field_validator("phone_number")
