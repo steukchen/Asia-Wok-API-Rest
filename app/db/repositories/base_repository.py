@@ -1,7 +1,7 @@
-from ...models import Base
+from app.models import Base
 from typing import List
 from pydantic import BaseModel
-from ..session import session
+from app.db.session import session
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 

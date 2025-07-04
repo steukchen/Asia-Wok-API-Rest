@@ -1,7 +1,7 @@
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Enum,TIMESTAMP,text,INTEGER
 from sqlalchemy.orm import Mapped,mapped_column
-from ..db.session import engine,SessionLocal
+from app.db.session import engine,SessionLocal
 
 DeclarativeBase = declarative_base()
 

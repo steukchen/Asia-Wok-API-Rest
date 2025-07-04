@@ -1,5 +1,5 @@
 from .base_repository import BaseRepository
-from ...models import Currency
+from app.models import Currency
 
 class CurrencyRepository(BaseRepository):
     def __init__(self):
