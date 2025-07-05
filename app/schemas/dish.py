@@ -49,7 +49,7 @@ class DishResponse(BaseModel):
     name: str
     description: str = None
     price: float
-    type_id: int
+    type: DishTypeResponse
     
     model_config = {
         "json_schema_extra":
@@ -59,7 +59,7 @@ class DishResponse(BaseModel):
                     "name": "Chop Suey",
                     "description":"Comida muy rica asiatica",
                     "price": 2.45,
-                    "type_id": 1
+                    "type": 1
                 }
             }
     }
@@ -85,6 +85,12 @@ class DishRequest(BaseModel):
             raise ValueError("The price mush be greather than 0")
         return value
     
+    @field_validator("type_id")
+    def validate_type(cls,value: int) -> int:
+        if value <= 0:
+            raise ValueError("The type_id must be greather than 0")
+        return value
+    
     model_config = {
         "json_schema_extra":
             {
@@ -96,3 +102,10 @@ class DishRequest(BaseModel):
                 }
             }
     }
+
+
+class DishUpdate(DishRequest):
+    name: str = None
+    description: str = None
+    price: float = None
+    type_id: int = None
