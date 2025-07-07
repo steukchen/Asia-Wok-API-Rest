@@ -15,7 +15,7 @@ class UserResponse(BaseModel):
         "json_schema_extra":
             {
                 "example": {
-                    "id": 1,
+                    "id": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
                     "username": "HARSUE",
                     "email": "HARSUE0311@GMAIL.COM",
                     "rol": "superadmin"

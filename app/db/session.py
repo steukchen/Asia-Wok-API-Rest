@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import status,HTTPException
 from functools import wraps
 from typing import Callable
+from .exception import ExceptionRepository
 
 engine = create_engine(settings.DATABASE_URL,connect_args={"options": "-c timezone=utc"})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -29,19 +30,23 @@ def session(func: Callable):
                 session.commit()
                 return result
             except IntegrityError as e:
-                
+                error = str(e.orig).split("\n")[1]
                 session.rollback()  
                 
                 if "ForeignKeyViolation" in str(e):
-                    raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Foreign key violation")
+                    raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail=f"Foreign key violation: {error}")
                 
                 if "UniqueViolation" in str(e):
-                    raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Unique violation")
-                
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Integrity Error: "+str(e))
+                    raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail=f"Unique violation: {error}")
+                print(e)
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Integrity Error: "+str(error))
+            except ExceptionRepository as e:
+                session.rollback()  
+                raise HTTPException(status_code=e.code,detail=e.message)
             except Exception as e:  
                 session.rollback()  
                 print(e)
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Exception: "+str(e))
     
     return wrapper
+

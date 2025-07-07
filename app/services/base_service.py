@@ -48,7 +48,7 @@ class BaseService:
         return self._to_base_model(item_db=item_db)
     
     def create_one(self,item_request: BaseModel) -> BaseModel | None:
-        item_db = self.repo.create_one(data=item_request)
+        item_db = self.repo.create_one(data=item_request.model_dump())
         
         if not item_db:
             return None
@@ -56,7 +56,7 @@ class BaseService:
         return self._to_base_model(item_db=item_db)
     
     def update_one_by_column_primary(self,item_update: BaseModel, value: any) -> BaseModel | None:
-        item_db = self.repo.update_one_by_column_primary(data=item_update,value=value)
+        item_db = self.repo.update_one_by_column_primary(data=item_update.model_dump(),value=value)
         
         if not item_db:
             return None

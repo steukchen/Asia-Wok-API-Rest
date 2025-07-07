@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import dish_type, user, table, customer, currency,dish
+from .endpoints import dish_type, user, table, customer, currency,dish,order
 
 from app.models import insert_data_test
 
@@ -17,3 +17,4 @@ api_router.include_router(dish_type.router,prefix="/dishes_types",tags=["DISHES_
 api_router.include_router(customer.router,prefix="/customers",tags=["CUSTOMERS"])
 api_router.include_router(currency.router,prefix="/currencies",tags=["CURRENCIES"])
 api_router.include_router(dish.router,prefix="/dishes",tags=["DISHES"])
+api_router.include_router(order.router,prefix="/orders",tags=["ORDERS"])

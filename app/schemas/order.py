@@ -1,0 +1,156 @@
+from pydantic import BaseModel, field_validator,field_serializer
+from datetime import datetime
+from .dish import DishResponse
+from typing import List,Dict
+
+class OrderResponse(BaseModel):
+    id: int
+    customer_id: int | None
+    order_date: datetime
+    created_by: str
+    table_id: int
+    state: str
+    
+    @field_validator("created_by",mode="before")
+    def validate_id(cls,value):
+        return str(value)
+    
+    @field_serializer("order_date")
+    def serialize_order_date(self,value: datetime):
+        return value.strftime("%d/%m/%Y, %H:%M:%S")
+    
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "id": 1,
+                    "customer_id": 1,
+                    "order_date": "03/11/2005, 14:24:30",
+                    "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
+                    "table_id": 1,
+                    "state": "pending",
+                }
+            }
+    }
+
+class OrderDishResponse(BaseModel):
+    dish: DishResponse
+    quantity: int
+
+class OrderDishesResponse(OrderResponse):
+    dishes: List[OrderDishResponse] | List
+
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "id": 1,
+                    "customer_id": 1,
+                    "order_date": "03/11/2005, 14:24:30",
+                    "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
+                    "table_id": 1,
+                    "state": "pending",
+                    "dishes": [
+                        {
+                            "dish": {
+                                "id": 1,
+                                "name": "Chop Suey",
+                                "description":"Comida muy rica asiatica",
+                                "price": 2.45,
+                                "type": 1
+                            },
+                            "quantity": 2
+                        },
+                    ]
+                    
+                }
+            }
+    }
+
+class OrderBase(BaseModel):
+    customer_id: int = None
+    order_date: datetime = datetime.now()
+    created_by: str
+    table_id: int
+    state: str = "pending"
+    
+    @field_validator("customer_id","table_id")
+    def validate_id(cls,value: int) -> int:
+        if value <= 0:
+            raise ValueError("Customer_id and Table_id must be greather than 0.")
+
+        return value
+    
+    @field_validator("created_by")
+    def validate_created_by(cls,value: str) -> str:
+        if len(value) < 10:
+            raise ValueError("Created_by must be 10 characteres or more")
+        
+        return value
+    
+    @field_validator("state")
+    def validate_state(cls,value: str) -> str:
+        value = value.lower()
+        states = 'pending','completed','cancelled'
+        if value not in states:
+            raise ValueError("Invalid State.")
+        
+        return value
+    
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "customer_id": 1,
+                    "order_date": datetime.now(),
+                    "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
+                    "table_id": 1,
+                    "state": "pending",
+                }
+            }
+    }
+
+class OrderDishesRequest(BaseModel):
+    dishes: List[List[int]]
+    
+    @field_validator("dishes")
+    def validate_dishes(cls,value: List[int]) -> List[int]:
+        for i,_ in value:
+            if len(tuple(filter(lambda x: x[0] == i,value))) > 1:
+                raise ValueError("Dish_id repeated")
+            if i <= 0:
+                raise ValueError("Invalid dish_id")
+        
+        return value
+    
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "dishes": [[2,3],[1,3],[3,1]]
+                }
+            }
+    }
+
+class OrderRequest(OrderBase,OrderDishesRequest):
+    
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "customer_id": 1,
+                    "order_date": datetime.now(),
+                    "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
+                    "table_id": 1,
+                    "state": "pending",
+                    "dishes": [[2,3],[1,3],[3,1]]
+                }
+            }
+    }
+    
+class OrderUpdate(OrderBase):
+    customer_id: int = None
+    order_date: datetime = None
+    created_by: str = None
+    table_id: int = None
+    state: str = None

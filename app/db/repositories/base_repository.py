@@ -1,6 +1,5 @@
 from app.models import Base
 from typing import List
-from pydantic import BaseModel
 from app.db.session import session
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -35,23 +34,21 @@ class BaseRepository:
         return item[0]
     
     @session
-    def create_one(self,session: Session, data: BaseModel) -> Base:
-        data = data.model_dump()
+    def create_one(self,session: Session, data: dict) -> Base:
         item = self.base(
             **data
         )
         session.add(item)
+        session.flush([item])
         
         return item
 
     @session
-    def update_one_by_column_primary(self,session: Session, value: any, data: BaseModel) -> Base | None:
+    def update_one_by_column_primary(self,session: Session, value: any, data: dict) -> Base | None:
         item = self.get_one_by_column_primary(session=session,value=value)
         
         if not item:
             return None
-        
-        data = data.model_dump()
         
         for property,v in data.items():
             if v is not None:

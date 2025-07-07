@@ -21,12 +21,12 @@ order_states = Enum('pending','completed','cancelled',name="order_states")
 
 async def create_structure():
     DeclarativeBase.metadata.create_all(bind=engine)
-    with open("SQL/functions.sql","r") as file:
-        sql = text(file.read())
+    # with open("SQL/functions.sql","r") as file:
+    #     sql = text(file.read())
     
-    with SessionLocal() as session:
-        session.execute(sql)
-        session.commit()
+    # with SessionLocal() as session:
+    #     session.execute(sql)
+    #     session.commit()
     print("Database structure created")
     
 def insert_data_test():
