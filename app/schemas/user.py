@@ -1,4 +1,4 @@
-from pydantic import BaseModel,field_validator,ConfigDict
+from pydantic import BaseModel,field_validator
 from app.utils import validate_email,hash_password
 
 class UserResponse(BaseModel):
@@ -7,11 +7,15 @@ class UserResponse(BaseModel):
     email: str
     rol: str
     
+    @field_validator("id",mode="before")
+    def validate_id(cls,value):
+        return str(value)
+
     model_config = {
         "json_schema_extra":
             {
                 "example": {
-                    "id": 1,
+                    "id": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
                     "username": "HARSUE",
                     "email": "HARSUE0311@GMAIL.COM",
                     "rol": "superadmin"

@@ -2,9 +2,9 @@
 BEGIN; 
 
 	WITH new_register AS (
-	  INSERT INTO users (username, email,rol,password)
-	  VALUES ('HARSUE', 'HARWINGMR@GMAIL.COM','superadmin','RELAMPAGOARRASA')
-	  RETURNING id
+		INSERT INTO users (username, email,rol,password)
+		VALUES ('HARSUE', 'HARWINGMR@GMAIL.COM','superadmin','RELAMPAGOARRASA')
+		RETURNING id
 	)
 	SELECT SET_CONFIG('app.user_id', id::TEXT, true)
 	FROM new_register;
@@ -21,7 +21,7 @@ BEGIN;
 	(2,'COCA COLA','NOSEPO MENX2',2,2);
 
 	INSERT INTO currencies(id,name,exchange)
-	VALUES (1,'BS',96),(2,'COP',3800);
+	VALUES (1,'DOLAR',1),(2,'BS',96),(3,'COP',3800);
 
 	INSERT INTO tables (id,name)
 	VALUES (1,'MESA 1'),(2,'MESA 2'),(3,'MESA 3');
@@ -29,11 +29,11 @@ BEGIN;
 	INSERT INTO orders(id,customer_id,created_by,table_id)
 	VALUES (1,1,uuid(current_setting('app.user_id')),1);
 
-	INSERT INTO order_dishes(order_id,dish_id,quantity)
-	VALUES (1,1,2),(1,2,1);
+	INSERT INTO order_dishes(order_id,dish_id,quantity,price)
+	VALUES (1,1,2,3.40),(1,2,1,2.2);
 
-	INSERT INTO order_currencies(order_id,currency_id,quantity)
-	VALUES (1,2,29640);
+	INSERT INTO order_currencies(order_id,currency_id,quantity,exchange)
+	VALUES (1,3,29640,3800);
 	
 
 COMMIT; 
