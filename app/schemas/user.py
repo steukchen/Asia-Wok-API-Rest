@@ -22,7 +22,11 @@ class UserResponse(BaseModel):
                 }
             }
     }
-    
+
+class UserDataResponse(BaseModel):
+    user_data: UserResponse
+    ws_token: str
+
 class UserRequest(BaseModel):
     username: str
     email: str
