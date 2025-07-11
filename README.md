@@ -44,9 +44,15 @@ pip install -r requirements.txt
 
     ```env
     DATABASE_URL=postgresql://user:password@localhost/db_name
+    ALGORITHM = "HS256"
+    SECRET_KEY = "SECRET_KEY"
     ```
 
 - Ejecutar
+
+    ```bash
+    python -m app.test.create_data
+    ```
 
     ```bash
     uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload

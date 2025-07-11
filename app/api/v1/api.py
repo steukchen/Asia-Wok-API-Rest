@@ -2,15 +2,9 @@ from fastapi import APIRouter,Depends
 from .endpoints import dish_type, user, table, customer, currency,dish,order,security
 from app.core.security import get_data_token
 
-from app.models import insert_data_test
 
 api_router = APIRouter()
 api_router_private = APIRouter(dependencies=[Depends(get_data_token)])
-
-@api_router_private.get("/data_test")
-def data_test():
-    insert_data_test()
-    return True
 
 
 api_router_private.include_router(user.router,prefix="/users",tags=["USERS"])

@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from app.schemas.order import OrderResponse,OrderRequest,OrderUpdate,OrderDishesRequest,OrderDishesResponse
 from typing import List
 from app.services import OrderService
+from app.core.security import token_depend
 
 router = APIRouter()
 
@@ -26,7 +27,9 @@ def get_order_dishes(id: int = Path(gt=0),service: OrderService = Depends()) -> 
 
 
 @router.post("/create_order",status_code=status.HTTP_201_CREATED)
-def create_order(order_request: OrderRequest, service: OrderService = Depends()) -> OrderDishesResponse:
+def create_order(data: token_depend,order_request: OrderRequest, service: OrderService = Depends()) -> OrderDishesResponse:
+    order_request.created_by = data["id"]
+    
     order = service.create_one(order_request=order_request)
     
     if not order:

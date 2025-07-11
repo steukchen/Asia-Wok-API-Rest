@@ -11,4 +11,4 @@ from .order_dish_audit import OrderDishAudit
 from .order_currency_audit import OrderCurrencyAudit
 from .base import Base
 
-from .base import create_structure,insert_data_test
+from .base import create_structure

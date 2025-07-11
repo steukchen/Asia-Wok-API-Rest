@@ -78,7 +78,7 @@ class OrderRepository(BaseRepository):
             for dish in repeated_dishes:
                 dish_data = list(filter(lambda x: x[0]==dish[0].dish_id, dishes_data))[0]
                 quantity = dish_data[1]
-                dish[0].quantity += quantity
+                dish[0].quantity = quantity
                 if dish[0].quantity <= 0:
                     session.delete(dish[0])
                 dishes_data.remove(dish_data)
@@ -110,3 +110,13 @@ class OrderRepository(BaseRepository):
             result = None
         
         return [order_db,result]
+    
+    @session
+    def delete_one_by_column_primary(self,session: Session, value: int) -> bool:
+        query = select(OrderDish).where(OrderDish.order_id==value)
+        dishes = session.execute(query).fetchall()
+        for dish in dishes: 
+            session.delete(dish[0])
+        session.flush()
+        is_deleted = super().delete_one_by_column_primary(session=session,value=value)
+        return is_deleted is not None

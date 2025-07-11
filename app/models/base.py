@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Enum,TIMESTAMP,text,INTEGER
+from sqlalchemy import Enum,TIMESTAMP,text,INTEGER,Boolean
 from sqlalchemy.orm import Mapped,mapped_column
 from app.db.session import engine,SessionLocal
 
@@ -7,6 +7,7 @@ DeclarativeBase = declarative_base()
 
 class Base(DeclarativeBase):
     __abstract__ = True
+    status: Mapped[bool] = mapped_column(Boolean,nullable=False,server_default=text("TRUE"))
     created_at: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP(timezone=True),nullable=False,server_default=text("NOW()"))
     updated_at: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP(timezone=True),nullable=False,server_default=text("NOW()"))
 
@@ -29,9 +30,3 @@ async def create_structure():
     #     session.commit()
     print("Database structure created")
     
-def insert_data_test():
-    with open("SQL/data_test.sql","r") as file:
-        sql = text(file.read())
-    with SessionLocal() as session:
-        session.execute(sql)
-        session.commit()

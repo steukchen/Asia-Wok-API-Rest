@@ -6,6 +6,7 @@ class UserResponse(BaseModel):
     username: str
     email: str
     rol: str
+    status: bool
     
     @field_validator("id",mode="before")
     def validate_id(cls,value):
@@ -31,6 +32,7 @@ class UserRequest(BaseModel):
     username: str
     email: str
     rol: str = "waiter"
+    status: bool = True
     password: str
     
     @field_validator("username")
@@ -71,7 +73,8 @@ class UserRequest(BaseModel):
                     "username": "HARSUE",
                     "email": "HARSUE0311@GMAIL.COM",
                     "rol": "superadmin",
-                    "password": "fakepassword123"
+                    "password": "fakepassword123",
+                    "status": True
                 }
             }
     }

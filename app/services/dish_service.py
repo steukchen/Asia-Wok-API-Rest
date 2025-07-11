@@ -14,6 +14,7 @@ class DishService(BaseService):
             name=item_db[0].name,
             description=item_db[0].description,
             price=item_db[0].price,
+            status=item_db[0].status,
             type = DishTypeResponse(
                 id=item_db[1].id,
                 name=item_db[1].name
@@ -28,6 +29,7 @@ class DishService(BaseService):
             name=item_db[0].name,
             description=item_db[0].description,
             price=item_db[0].price,
+            status=item_db[0].status,
             type = DishTypeResponse(
                 id=item_db[1].id,
                 name=item_db[1].name

@@ -70,7 +70,7 @@ class OrderDishesResponse(OrderResponse):
 class OrderBase(BaseModel):
     customer_id: int = None
     order_date: datetime = datetime.now()
-    created_by: str
+    created_by: str | None = None
     table_id: int
     state: str = "pending"
     
@@ -103,7 +103,6 @@ class OrderBase(BaseModel):
                 "example": {
                     "customer_id": 1,
                     "order_date": datetime.now(),
-                    "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
                     "table_id": 1,
                     "state": "pending",
                 }
@@ -140,7 +139,6 @@ class OrderRequest(OrderBase,OrderDishesRequest):
                 "example": {
                     "customer_id": 1,
                     "order_date": datetime.now(),
-                    "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
                     "table_id": 1,
                     "state": "pending",
                     "dishes": [[2,3],[1,3],[3,1]]

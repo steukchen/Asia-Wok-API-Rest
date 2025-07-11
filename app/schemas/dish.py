@@ -50,6 +50,7 @@ class DishResponse(BaseModel):
     description: str = None
     price: float
     type: DishTypeResponse
+    status: bool
     
     model_config = {
         "json_schema_extra":
@@ -59,7 +60,8 @@ class DishResponse(BaseModel):
                     "name": "Chop Suey",
                     "description":"Comida muy rica asiatica",
                     "price": 2.45,
-                    "type": 1
+                    "type": 1,
+                    "status": True
                 }
             }
     }
@@ -69,6 +71,7 @@ class DishRequest(BaseModel):
     description: str = None
     price: float
     type_id: int
+    status: bool = True
     
     @field_validator("name")
     def validate_name(cls, value: str) -> str:
@@ -98,7 +101,8 @@ class DishRequest(BaseModel):
                     "name": "Coca Cola",
                     "description":"Chop Suey",
                     "price": 2.45,
-                    "type_id": 1
+                    "type_id": 1,
+                    "status": True
                 }
             }
     }
