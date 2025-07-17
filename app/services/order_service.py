@@ -13,12 +13,14 @@ class OrderService(BaseService):
     def create_one(self,order_request: OrderRequest) -> OrderDishesResponse | None:
         order_request = order_request.model_dump()
         dishes = order_request.pop("dishes")
+        dishes = [[dish["dish_id"],dish["quantity"]] for dish in dishes]
         
         result = self.repo.create_with_dishes(dishes_data=dishes,order_request=order_request)
         return self._to_order_dishes_response(data=result)
     
     def update_dishes(self,order_id: int,dishes: OrderDishesRequest) -> OrderDishesResponse:
         dishes = dishes.model_dump().pop("dishes")
+        dishes = [[dish["dish_id"],dish["quantity"]] for dish in dishes]
         result = self.repo.update_dishes(dishes_data=dishes,order_id=order_id)
         
         return self._to_order_dishes_response(data=result)

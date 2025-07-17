@@ -50,7 +50,6 @@ class DishResponse(BaseModel):
     description: str = None
     price: float
     type: DishTypeResponse
-    status: bool
     
     model_config = {
         "json_schema_extra":

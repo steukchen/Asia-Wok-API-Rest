@@ -17,7 +17,7 @@ class OrderResponse(BaseModel):
     
     @field_serializer("order_date")
     def serialize_order_date(self,value: datetime):
-        return value.strftime("%d/%m/%Y, %H:%M:%S")
+        return value.strftime("%m/%d/%Y, %H:%M:%S")
     
     model_config = {
         "json_schema_extra":
@@ -25,7 +25,7 @@ class OrderResponse(BaseModel):
                 "example": {
                     "id": 1,
                     "customer_id": 1,
-                    "order_date": "03/11/2005, 14:24:30",
+                    "order_date": "MM/DD/YYYY hh:mm:ss",
                     "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
                     "table_id": 1,
                     "state": "pending",
@@ -46,7 +46,7 @@ class OrderDishesResponse(OrderResponse):
                 "example": {
                     "id": 1,
                     "customer_id": 1,
-                    "order_date": "03/11/2005, 14:24:30",
+                    "order_date": "MM/DD/YYYY hh:mm:ss",
                     "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
                     "table_id": 1,
                     "state": "pending",
@@ -109,16 +109,32 @@ class OrderBase(BaseModel):
             }
     }
 
+class OrderDishRequest(BaseModel):
+    dish_id: int
+    quantity: int 
+    
+    @field_validator("dish_id")
+    def validate_dish_id(cls,value: int) -> int:
+        if value <= 0:
+            raise ValueError("Invalid dish_id")
+        
+        return value
+
+    @field_validator("quantity")
+    def validate_quantity(cls,value: int) -> int:
+        if value < 0:
+            raise ValueError("Invalid quantity")
+        
+        return value
+
 class OrderDishesRequest(BaseModel):
-    dishes: List[List[int]]
+    dishes: List[OrderDishRequest]
     
     @field_validator("dishes")
-    def validate_dishes(cls,value: List[int]) -> List[int]:
-        for i,_ in value:
-            if len(tuple(filter(lambda x: x[0] == i,value))) > 1:
+    def validate_dishes(cls,value: List[OrderDishRequest]) -> List[OrderDishRequest]:
+        for i in value:
+            if len(tuple(filter(lambda x: x.dish_id == i.dish_id,value))) > 1:
                 raise ValueError("Dish_id repeated")
-            if i <= 0:
-                raise ValueError("Invalid dish_id")
         
         return value
     
@@ -126,7 +142,16 @@ class OrderDishesRequest(BaseModel):
         "json_schema_extra":
             {
                 "example": {
-                    "dishes": [[2,3],[1,3],[3,1]]
+                    "dishes": [
+                        {
+                            "dish_id":1,
+                            "quantity":2
+                        },
+                        {
+                            "dish_id":2,
+                            "quantity":1
+                        }
+                    ]
                 }
             }
     }
@@ -141,7 +166,16 @@ class OrderRequest(OrderBase,OrderDishesRequest):
                     "order_date": datetime.now(),
                     "table_id": 1,
                     "state": "pending",
-                    "dishes": [[2,3],[1,3],[3,1]]
+                    "dishes": [
+                        {
+                            "dish_id":1,
+                            "quantity":2
+                        },
+                        {
+                            "dish_id":2,
+                            "quantity":1
+                        }
+                    ]
                 }
             }
     }
