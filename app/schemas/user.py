@@ -1,5 +1,6 @@
 from pydantic import BaseModel,field_validator
 from app.utils import validate_email,hash_password
+from re import fullmatch
 
 class UserResponse(BaseModel):
     id: str
@@ -38,9 +39,10 @@ class UserRequest(BaseModel):
     @field_validator("username")
     def validate_username(cls, value: str) -> str:
         value =value.upper()
-        
-        if len(value) <= 4:
-            raise ValueError("The username must be longer than 4 characters.")
+        if " " in value:
+            raise ValueError("The username cannot have spaces.")
+        if len(value) <= 3:
+            raise ValueError("The username must be longer than 3 characters.")
         
         return value
     
@@ -64,6 +66,12 @@ class UserRequest(BaseModel):
     
     @field_validator("password")
     def validate_password(cls,value: str) -> str:
+        regex = r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$'
+        if not fullmatch(regex, value):
+            raise ValueError(
+                "Password must have at least one number, one special character, one uppercase letter, one lowercase letter, and be at least 8 characters long"
+            )
+        
         return hash_password(value)
     
     model_config = {
@@ -73,7 +81,7 @@ class UserRequest(BaseModel):
                     "username": "HARSUE",
                     "email": "HARSUE0311@GMAIL.COM",
                     "rol": "admin",
-                    "password": "fakepassword123",
+                    "password": "FakePassword123.",
                     "status": True
                 }
             }

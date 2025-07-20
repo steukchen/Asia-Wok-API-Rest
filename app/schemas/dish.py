@@ -30,8 +30,8 @@ class DishTypeRequest(BaseModel):
     def validate_name(cls, value: str) -> str:
         value =value.upper()
         
-        if len(value) <= 4:
-            raise ValueError("The name must be longer than 4 characters.")
+        if len(value) <= 3:
+            raise ValueError("The name must be longer than 3 characters.")
         
         return value
     
@@ -76,8 +76,8 @@ class DishRequest(BaseModel):
     def validate_name(cls, value: str) -> str:
         value = value.upper()
         
-        if len(value) <= 4:
-            raise ValueError("The name must be longer than 4 characters.")
+        if len(value) <= 3:
+            raise ValueError("The name must be longer than 3 characters.")
         
         return value
     
