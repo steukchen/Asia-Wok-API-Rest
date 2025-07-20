@@ -2,14 +2,15 @@ from fastapi import APIRouter,status,HTTPException,Depends,Path
 from fastapi.responses import JSONResponse
 from app.schemas.order import OrderResponse,OrderRequest,OrderUpdate,OrderDishesRequest,OrderDishesResponse
 from typing import List
-from app.services import OrderService
+from app.services import OrderService,TableService
 from app.core.security import token_depend
+from app.schemas.table import TableUpdate
 
 router = APIRouter()
 
 @router.get("/get_orders",status_code=status.HTTP_200_OK)
-def get_orders(service: OrderService = Depends()) -> List[OrderResponse]:
-    orders_response = service.get_all()
+def get_orders(data: token_depend,service: OrderService = Depends()) -> List[OrderResponse]:
+    orders_response = service.get_all(rol=data["rol"])
     
     if not orders_response:
         raise HTTPException(detail="Orders not Found.",status_code=status.HTTP_404_NOT_FOUND)
@@ -31,6 +32,7 @@ def create_order(data: token_depend,order_request: OrderRequest, service: OrderS
     order_request.created_by = data["id"]
     
     order = service.create_one(order_request=order_request)
+    TableService().update_one_by_column_primary(TableUpdate(state="occupied"),order_request.table_id)
     
     if not order:
         raise HTTPException(detail=f"Order not created",status_code=status.HTTP_400_BAD_REQUEST)

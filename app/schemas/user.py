@@ -19,7 +19,7 @@ class UserResponse(BaseModel):
                     "id": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
                     "username": "HARSUE",
                     "email": "HARSUE0311@GMAIL.COM",
-                    "rol": "superadmin"
+                    "rol": "admin"
                 }
             }
     }
@@ -46,7 +46,7 @@ class UserRequest(BaseModel):
     
     @field_validator("rol")
     def validate_rol(cls,value: str) -> str:
-        roles = ["waiter","chef",'admin','superadmin']
+        roles = ['admin','cashier','chef','waiter']
         value = value.lower()
         if value not in roles:
             raise ValueError("Invalid Rol.")
@@ -72,7 +72,7 @@ class UserRequest(BaseModel):
                 "example": {
                     "username": "HARSUE",
                     "email": "HARSUE0311@GMAIL.COM",
-                    "rol": "superadmin",
+                    "rol": "admin",
                     "password": "fakepassword123",
                     "status": True
                 }

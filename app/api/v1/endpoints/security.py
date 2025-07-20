@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Form,Depends,HTTPException,status
 from fastapi.responses import JSONResponse
-from app.core.security import encode_token,token_depend
+from app.core.security import encode_token,token_depend,validate_token
 from app.services import UserService
 from app.schemas.user import UserDataResponse
 
@@ -29,6 +29,8 @@ def get_validate_token(data: token_depend,service: UserService = Depends()) -> U
     user = service.get_one_by_column_primary(value=data["id"])
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="INVALID CREDENTIALS")
+
+    ws_token = encode_token(id=data["id"],rol=data["rol"],ws=True)
     
-    return UserDataResponse(user_data=user,ws_token=data["ws_token"])
+    return UserDataResponse(user_data=user,ws_token=ws_token)
 

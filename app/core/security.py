@@ -9,26 +9,16 @@ from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(settings.API_V1_STR+"/token")
 
-def encode_token(id:str,rol:str):
+def encode_token(id:str,rol:str,ws=False):
     try:
-        payload_ws = {
-            "sub": json.dumps(
-                    {
-                        "id":id,
-                        "rol":rol,
-                        
-                    }),
-            "exp": datetime.now(UTC) + timedelta(minutes=30)
-        }
-        ws_token = jwt.encode(payload_ws,settings.SECRET_KEY,algorithm=settings.ALGORITHM)
-        
+        time = timedelta(days=7) if not ws else timedelta(minutes=30)
         payload = {
             "sub": json.dumps(
                     {
                         "id":id,
-                        "ws_token": ws_token
+                        "rol": rol
                     }),
-            "exp": datetime.now(UTC) + timedelta(days=7)
+            "exp": datetime.now(UTC) + time
         }
         token = jwt.encode(payload,settings.SECRET_KEY,algorithm=settings.ALGORITHM)
         return token
@@ -48,10 +38,7 @@ def verify_token(token: str):
 
 
 def validate_token(token:str) -> dict | None:
-    try:
-        data = json.loads(verify_token(token))
-    except Exception as e:
-        return None
+    data = json.loads(verify_token(token))
     return data
 
 

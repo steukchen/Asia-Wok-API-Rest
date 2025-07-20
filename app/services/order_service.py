@@ -9,8 +9,19 @@ class OrderService(BaseService):
     def __init__(self):
         self.response = OrderResponse
         self.repo = OrderRepository()
+        
+    def get_all(self,rol: str) -> List[OrderResponse] | None:
+        if rol == "chef":
+            state = ["pending","preparing"]
+        elif rol == "waiter":
+            state = ["pending","preparing","made"]
+        else:
+            return super().get_all()
+        items = items_db=self.repo.get_all_filter(state=state)
+        return self._to_base_models(items_db=items) if items else None
     
     def create_one(self,order_request: OrderRequest) -> OrderDishesResponse | None:
+        table_id = order_request.table_id
         order_request = order_request.model_dump()
         dishes = order_request.pop("dishes")
         dishes = [[dish["dish_id"],dish["quantity"]] for dish in dishes]
@@ -37,6 +48,7 @@ class OrderService(BaseService):
             customer_id=data[0].customer_id,
             order_date=data[0].order_date,
             created_by=data[0].created_by,
+            notes=data[0].notes,
             table_id=data[0].table_id,
             state=data[0].state,
             dishes=[None]
@@ -48,6 +60,7 @@ class OrderService(BaseService):
             customer_id=data[0].customer_id,
             order_date=data[0].order_date,
             created_by=data[0].created_by,
+            notes=data[0].notes,
             table_id=data[0].table_id,
             state=data[0].state,
             dishes=[OrderDishResponse(

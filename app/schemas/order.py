@@ -1,13 +1,14 @@
 from pydantic import BaseModel, field_validator,field_serializer
 from datetime import datetime
 from .dish import DishResponse
-from typing import List,Dict
+from typing import List
 
 class OrderResponse(BaseModel):
     id: int
     customer_id: int | None
     order_date: datetime
     created_by: str
+    notes: str | None = None
     table_id: int
     state: str
     
@@ -72,6 +73,7 @@ class OrderBase(BaseModel):
     order_date: datetime = datetime.now()
     created_by: str | None = None
     table_id: int
+    notes: str | None = None
     state: str = "pending"
     
     @field_validator("customer_id","table_id")
@@ -91,7 +93,7 @@ class OrderBase(BaseModel):
     @field_validator("state")
     def validate_state(cls,value: str) -> str:
         value = value.lower()
-        states = 'pending','completed','cancelled'
+        states = 'pending','preparing','made','completed','cancelled'
         if value not in states:
             raise ValueError("Invalid State.")
         
@@ -104,6 +106,7 @@ class OrderBase(BaseModel):
                     "customer_id": 1,
                     "order_date": datetime.now(),
                     "table_id": 1,
+                    "notes": "",
                     "state": "pending",
                 }
             }
@@ -166,6 +169,7 @@ class OrderRequest(OrderBase,OrderDishesRequest):
                     "order_date": datetime.now(),
                     "table_id": 1,
                     "state": "pending",
+                    "notes": "Notes",
                     "dishes": [
                         {
                             "dish_id":1,
@@ -183,6 +187,7 @@ class OrderRequest(OrderBase,OrderDishesRequest):
 class OrderUpdate(OrderBase):
     customer_id: int = None
     order_date: datetime = None
+    notes: str = None
     created_by: str = None
     table_id: int = None
     state: str = None

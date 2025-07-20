@@ -9,7 +9,17 @@ from sqlalchemy.sql.functions import sum
 class OrderRepository(BaseRepository):
     def __init__(self):
         self.base = Order
-
+    
+    @session
+    def get_all_filter(self,session: Session,state:List[str]) -> List[Order] | None:
+        query = select(Order).where(Order.state.in_(state))
+        items = session.execute(query).all()
+        if not items:
+            return None
+        
+        return [item[0] for item in items]
+    
+    
     @session
     def create_with_dishes(self,session: Session, order_request: dict,dishes_data: List[List[int]]) -> List[ Union[Order,List[List[Union[Dish,int]]]] ]:
         order_db: Order = self.create_one(session=session,data=order_request)

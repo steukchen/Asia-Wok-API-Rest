@@ -4,7 +4,7 @@ from app.schemas.user import UserRequest
 from app.schemas.dish import DishRequest,DishTypeRequest
 from app.schemas.currency import CurrencyRequest
 from app.schemas.customer import CustomerRequest
-from app.schemas.order import OrderRequest
+from app.schemas.order import OrderRequest,OrderDishRequest
 from app.schemas.table import TableRequest
 
 import asyncio
@@ -17,7 +17,7 @@ async def create_data():
     user = user_service.create_one(item_request=UserRequest(
         username="HARSUE",
         email="harsue0311@gmail.com",
-        rol="superadmin",
+        rol="admin",
         status=True,
         password="Pass123.."
     ))
@@ -57,7 +57,7 @@ async def create_data():
         name="Bolivar",
         exchange="102"
     ))
-    dolar = currency_service.create_one(CurrencyRequest(
+    cop = currency_service.create_one(CurrencyRequest(
         name="COP",
         exchange="4000"
     ))
@@ -77,7 +77,10 @@ async def create_data():
     ))
     
     OrderService().create_one(OrderRequest(
-        dishes=[[dish_1.id,3],[dish_2.id,1],],
+        dishes=[
+            OrderDishRequest(dish_id=dish_1.id,quantity=2),
+            OrderDishRequest(dish_id=dish_2.id,quantity=4)
+        ],
         customer_id=customer.id,
         created_by=user.id,
         table_id=table_1.id,
