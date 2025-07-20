@@ -34,7 +34,8 @@ async def websocket_endpoint(websocket: WebSocket):
             await active_connections[data_user["id"]].close(reason="Another connection")
         
         active_connections[data_user["id"]] = websocket
-        print(active_connections)
+        for c in active_connections.keys():
+            print(c + ": "+str(active_connections[c]))
         while True:
             data = await websocket.receive_json()
             print(data)
