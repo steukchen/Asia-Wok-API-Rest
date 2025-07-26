@@ -1,9 +1,10 @@
 from .base_service import BaseService
 from .dish_service import DishService
-from app.schemas.order import OrderResponse,OrderRequest,OrderDishesResponse,OrderDishResponse,OrderDishesRequest
+from .currency_service import CurrencyService
+from app.schemas.order import OrderResponse,OrderRequest,OrderDishesResponse,OrderDishResponse,OrderDishesRequest,OrderCurrenciesRequest,OrderCurrenciesResponse,OrderCurrencyResponse
 from app.db.repositories import OrderRepository
 from typing import List, Union
-from app.models import Order,Dish,DishType
+from app.models import Order,Dish,DishType,Currency
 
 class OrderService(BaseService):
     def __init__(self):
@@ -17,11 +18,11 @@ class OrderService(BaseService):
             state = ["pending","preparing","made"]
         else:
             return super().get_all()
-        items = items_db=self.repo.get_all_filter(state=state)
+        items =self.repo.get_all_filter(state=state)
         return self._to_base_models(items_db=items) if items else None
     
     def create_one(self,order_request: OrderRequest) -> OrderDishesResponse | None:
-        table_id = order_request.table_id
+        # table_id = order_request.table_id
         order_request = order_request.model_dump()
         dishes = order_request.pop("dishes")
         dishes = [[dish["dish_id"],dish["quantity"]] for dish in dishes]
@@ -67,4 +68,44 @@ class OrderService(BaseService):
                 dish=dish_service._to_base_model(item_db=[dish_detail[0],dish_detail[1]]),
                 quantity=dish_detail[2]
             ) for dish_detail in data[1]]
+        )
+        
+    def update_currencies(self,order_id: int,currencies: OrderCurrenciesRequest) -> OrderCurrenciesResponse:
+        currencies = currencies.model_dump().pop("currencies")
+        currencies = [[currency["currency_id"],currency["quantity"]] for currency in currencies]
+        result = self.repo.update_currencies(currencies_data=currencies,order_id=order_id)
+        
+        return self._to_order_currencies_response(data=result)
+
+    def get_one_with_currencies(self, order_id: int) -> OrderDishesResponse:
+        result = self.repo.get_one_with_currencies(order_id=order_id)
+        
+        return self._to_order_currencies_response(data=result)
+    
+    def _to_order_currencies_response(self,data: List[ Union[Order,List[Union[Currency,int]]] ]):
+        if not data[1]:
+            return OrderCurrenciesResponse(
+            id=data[0].id,
+            customer_id=data[0].customer_id,
+            order_date=data[0].order_date,
+            created_by=data[0].created_by,
+            notes=data[0].notes,
+            table_id=data[0].table_id,
+            state=data[0].state,
+            currencies=[None]
+        )
+        
+        currency_service = CurrencyService()
+        return OrderCurrenciesResponse(
+            id=data[0].id,
+            customer_id=data[0].customer_id,
+            order_date=data[0].order_date,
+            created_by=data[0].created_by,
+            notes=data[0].notes,
+            table_id=data[0].table_id,
+            state=data[0].state,
+            currencies=[OrderCurrencyResponse(
+                currency=currency_service._to_base_model(item_db=currency_detail[0]),
+                quantity=currency_detail[1]
+            ) for currency_detail in data[1]]
         )

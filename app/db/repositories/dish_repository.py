@@ -5,7 +5,7 @@ from .dish_type_repository import DishTypeRepository
 from app.db import session
 from typing import List,Tuple
 from sqlalchemy.orm import Session
-from sqlalchemy import select,join
+from sqlalchemy import select,asc
 from sqlalchemy.sql.operators import ilike_op
 from sqlalchemy.engine import Row
 
@@ -15,7 +15,7 @@ class DishRepository(BaseRepository):
     
     @session
     def get_dishes(self,session: Session) -> List[Tuple[Dish,DishType]]:
-        query = select(Dish,DishType).join(DishType,Dish.type_id==DishType.id)
+        query = select(Dish,DishType).join(DishType,Dish.type_id==DishType.id).order_by(asc(Dish.id))
         data = session.execute(query).fetchall()
         if not data:
             return None
