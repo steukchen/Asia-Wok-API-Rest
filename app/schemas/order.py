@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator,field_serializer
 from datetime import datetime
 from .dish import DishResponse
 from .currency import CurrencyResponse
+from .table import TableResponse
 from typing import List
 
 class OrderResponse(BaseModel):
@@ -10,7 +11,7 @@ class OrderResponse(BaseModel):
     order_date: datetime
     created_by: str
     notes: str | None = None
-    table_id: int
+    table: TableResponse
     state: str
     
     @field_validator("created_by",mode="before")

@@ -1,4 +1,4 @@
-from app.models import Order,OrderDish,DishType,Dish,Currency,OrderCurrency
+from app.models import Order,OrderDish,DishType,Dish,Currency,OrderCurrency,Table
 from .base_repository import BaseRepository
 from app.db import session,ExceptionRepository
 from sqlalchemy.orm import Session
@@ -11,13 +11,22 @@ class OrderRepository(BaseRepository):
         self.base = Order
     
     @session
-    def get_all_filter(self,session: Session,state:List[str]) -> List[Order] | None:
-        query = select(Order).where(Order.state.in_(state), text("date(orders.order_date)=date(NOW())"),Order.status==True).order_by(asc(Order.id))
+    def get_all_filter(self,session: Session,state:List[str]) -> List[Union[Order,Table]] | None:
+        query = select(Order,Table).join(Table,Order.table_id==Table.id).where(Order.state.in_(state), text("date(orders.order_date)=date(NOW())"),Order.status==True).order_by(asc(Order.id))
         items = session.execute(query).all()
         if not items:
             return None
         
-        return [item[0] for item in items]
+        return items
+    
+    @session
+    def get_one_with_table_by_column_primary(self,session: Session,value: int) -> List[Union[Order,Table]] | None:
+        query = select(Order,Table).join(Table,Order.table_id==Table.id).where(Order.id==value)
+        item = session.execute(query).fetchone()
+        
+        if not item:
+            return None
+        return item
     
     
     @session
@@ -102,7 +111,7 @@ class OrderRepository(BaseRepository):
     
     @session
     def get_one_with_dishes(self,session: Session,order_id: int) -> List[ Union[Order,List[Union[Dish,DishType,int]]] ]:
-        order_db: Order = self.get_one_by_column_primary(session=session,value=order_id)
+        order_db = self.get_one_with_table_by_column_primary(session=session,value=order_id)
         if not order_db:
             raise ExceptionRepository(message="Order Not Found",code=404)
         query = (
@@ -137,7 +146,7 @@ class OrderRepository(BaseRepository):
     
     @session
     def get_one_with_currencies(self,session: Session,order_id: int) -> List[ Union[Order,List[Union[Currency,int]]] ]:
-        order_db: Order = self.get_one_by_column_primary(session=session,value=order_id)
+        order_db = self.get_one_with_table_by_column_primary(session=session,value=order_id)
         if not order_db:
             raise ExceptionRepository(message="Order Not Found",code=404)
         query = (
@@ -220,3 +229,10 @@ class OrderRepository(BaseRepository):
             session.flush()
         
         return self.get_one_with_currencies(session=session,order_id=order_db.id)
+    
+    @session
+    def update_one_by_column_primary(self,session: Session, value: int, data: dict) -> Union[Order,Table] | None:
+        item = super().update_one_by_column_primary(session=session,value=value,data=data)
+        item = self.get_one_with_table_by_column_primary(session=session,value=value)
+        
+        return item

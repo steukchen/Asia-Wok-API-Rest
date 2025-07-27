@@ -52,7 +52,7 @@ def create_order(data: token_depend,order_request: OrderRequest, service: OrderS
     order_request.created_by = data["id"]
     
     order = service.create_one(order_request=order_request)
-    TableService().update_one_by_column_primary(TableUpdate(state="occupied"),order_request.table_id)
+    # TableService().update_one_by_column_primary(TableUpdate(state="occupied"),order_request.table_id)
     
     if not order:
         raise HTTPException(detail=f"Order not created",status_code=status.HTTP_400_BAD_REQUEST)
