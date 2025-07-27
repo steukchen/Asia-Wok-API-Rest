@@ -15,7 +15,7 @@ class DishRepository(BaseRepository):
     
     @session
     def get_dishes(self,session: Session) -> List[Tuple[Dish,DishType]]:
-        query = select(Dish,DishType).join(DishType,Dish.type_id==DishType.id).order_by(asc(Dish.id))
+        query = select(Dish,DishType).join(DishType,Dish.type_id==DishType.id).where(Dish.status==True).order_by(asc(Dish.id))
         data = session.execute(query).fetchall()
         if not data:
             return None
@@ -25,7 +25,7 @@ class DishRepository(BaseRepository):
     def get_dishes_by_type(self,session: Session,type_id: int) -> List[Tuple[Dish,DishType]]:
         query = (
             select(Dish,DishType).join(DishType,Dish.type_id==DishType.id)
-            .where(Dish.type_id==type_id)
+            .where(Dish.type_id==type_id,Dish.status==True)
         )
         data = session.execute(query).fetchall()
         
@@ -38,7 +38,7 @@ class DishRepository(BaseRepository):
     def get_dishes_by_name(self,session: Session, name: str) -> List[Tuple[Dish,DishType]]:
         query = (
             select(Dish,DishType).join(DishType,Dish.type_id==DishType.id)
-            .where(ilike_op(Dish.name,f"%{name}%"))
+            .where(ilike_op(Dish.name,f"%{name}%"),Dish.status==True)
         )
         
         data = session.execute(query).fetchall()

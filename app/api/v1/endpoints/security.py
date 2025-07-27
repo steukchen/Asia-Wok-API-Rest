@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Form,Depends,HTTPException,status
 from fastapi.responses import JSONResponse
-from app.core.security import encode_token,token_depend,validate_token
+from app.core.security import encode_token,token_depend
 from app.services import UserService
 from app.schemas.user import UserDataResponse
 

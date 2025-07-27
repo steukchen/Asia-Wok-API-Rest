@@ -12,7 +12,7 @@ class OrderRepository(BaseRepository):
     
     @session
     def get_all_filter(self,session: Session,state:List[str]) -> List[Order] | None:
-        query = select(Order).where(Order.state.in_(state), text("date(orders.order_date)=date(NOW())")).order_by(asc(Order.id))
+        query = select(Order).where(Order.state.in_(state), text("date(orders.order_date)=date(NOW())"),Order.status==True).order_by(asc(Order.id))
         items = session.execute(query).all()
         if not items:
             return None
@@ -43,7 +43,7 @@ class OrderRepository(BaseRepository):
         
         query = (
             select(Dish)
-            .where(Dish.id.in_(dishes_ids))
+            .where(Dish.id.in_(dishes_ids),Dish.status==True)
             .order_by(desc(Dish.id))
         )
         dishes_db = session.execute(query).fetchall()
@@ -122,16 +122,16 @@ class OrderRepository(BaseRepository):
     
     @session
     def delete_one_by_column_primary(self,session: Session, value: int) -> bool:
-        query = select(OrderDish).where(OrderDish.order_id==value)
-        dishes = session.execute(query).fetchall()
-        for dish in dishes: 
-            session.delete(dish[0])
-        session.flush()
-        query = select(OrderCurrency).where(OrderCurrency.order_id==value)
-        currencies = session.execute(query).fetchall()
-        for currency in currencies: 
-            session.delete(currency[0])
-        session.flush()
+        # query = select(OrderDish).where(OrderDish.order_id==value)
+        # dishes = session.execute(query).fetchall()
+        # for dish in dishes: 
+        #     session.delete(dish[0])
+        # session.flush()
+        # query = select(OrderCurrency).where(OrderCurrency.order_id==value)
+        # currencies = session.execute(query).fetchall()
+        # for currency in currencies: 
+        #     session.delete(currency[0])
+        # session.flush()
         is_deleted = super().delete_one_by_column_primary(session=session,value=value)
         return is_deleted is not None
     
@@ -164,7 +164,7 @@ class OrderRepository(BaseRepository):
         
         query = (
             select(Currency)
-            .where(Currency.id.in_(currencies_ids))
+            .where(Currency.id.in_(currencies_ids),Currency.status==True)
             .order_by(desc(Currency.id))
         )
         currencies_db = session.execute(query).fetchall()

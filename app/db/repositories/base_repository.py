@@ -11,7 +11,7 @@ class BaseRepository:
     
     @session
     def get_all(self,session: Session) -> List[Base] | None:
-        query = select(self.base).order_by(asc(self.base.id))
+        query = select(self.base).where(self.base.status==True).order_by(asc(self.base.id))
         items = session.execute(query).all()
         if not items:
             return None
@@ -60,8 +60,9 @@ class BaseRepository:
     @session
     def delete_one_by_column_primary(self,session: Session, value: any) -> bool:
         item = self.get_one_by_column_primary(session=session,value=value)
-        
         if item:
-            session.delete(item)
+            item.status = False
+        # if item:
+        #     session.delete(item)
         
         return item is not None
