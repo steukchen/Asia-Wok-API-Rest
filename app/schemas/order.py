@@ -1,6 +1,7 @@
 from pydantic import BaseModel, field_validator,field_serializer
 from datetime import datetime
 from .dish import DishResponse
+from .currency import CurrencyResponse
 from typing import List
 
 class OrderResponse(BaseModel):
@@ -70,7 +71,7 @@ class OrderDishesResponse(OrderResponse):
 
 class OrderBase(BaseModel):
     customer_id: int = None
-    order_date: datetime = datetime.now()
+    # order_date: datetime = datetime.now()
     created_by: str | None = None
     table_id: int
     notes: str | None = None
@@ -186,8 +187,62 @@ class OrderRequest(OrderBase,OrderDishesRequest):
     
 class OrderUpdate(OrderBase):
     customer_id: int = None
-    order_date: datetime = None
+    # order_date: datetime = None
     notes: str = None
     created_by: str = None
     table_id: int = None
     state: str = None
+    
+
+class OrderCurrencyRequest(BaseModel):
+    currency_id: int
+    quantity: float 
+    
+    @field_validator("currency_id")
+    def validate_currency_id(cls,value: int) -> int:
+        if value <= 0:
+            raise ValueError("Invalid currency_id")
+        
+        return value
+
+    @field_validator("quantity")
+    def validate_quantity(cls,value: float) -> float:
+        if value < 0:
+            raise ValueError("Invalid quantity")
+        
+        return value    
+
+class OrderCurrenciesRequest(BaseModel):
+    currencies: List[OrderCurrencyRequest]
+    
+class OrderCurrencyResponse(BaseModel):
+    currency: CurrencyResponse
+    quantity: float
+    
+class OrderCurrenciesResponse(OrderResponse):
+    currencies: List[OrderCurrencyResponse] | List
+
+    model_config = {
+        "json_schema_extra":
+            {
+                "example": {
+                    "id": 1,
+                    "customer_id": 1,
+                    "order_date": "MM/DD/YYYY hh:mm:ss",
+                    "created_by": "76ff5576-f9c2-4b85-844e-dff1b3b9a3dd",
+                    "table_id": 1,
+                    "state": "pending",
+                    "currencies": [
+                        {
+                            "currency": {
+                                "id": 1,
+                                "name": "DOLAR",
+                                "exchange": 1
+                            },
+                            "quantity": 3.2
+                        },
+                    ]
+                    
+                }
+            }
+    }

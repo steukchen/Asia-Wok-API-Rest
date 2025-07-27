@@ -3,6 +3,7 @@ from typing import List
 from app.db.session import session
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.sql import asc
 
 class BaseRepository:
     base: Base
@@ -10,7 +11,7 @@ class BaseRepository:
     
     @session
     def get_all(self,session: Session) -> List[Base] | None:
-        query = select(self.base)
+        query = select(self.base).order_by(asc(self.base.id))
         items = session.execute(query).all()
         if not items:
             return None
