@@ -3,7 +3,7 @@ from .base_repository import BaseRepository
 from app.db import session,ExceptionRepository
 from sqlalchemy.orm import Session
 from typing import List,Union
-from sqlalchemy import select,desc
+from sqlalchemy import select,desc,asc
 from sqlalchemy.sql.functions import sum
 
 class OrderRepository(BaseRepository):
@@ -12,7 +12,7 @@ class OrderRepository(BaseRepository):
     
     @session
     def get_all_filter(self,session: Session,state:List[str]) -> List[Order] | None:
-        query = select(Order).where(Order.state.in_(state))
+        query = select(Order).where(Order.state.in_(state)).order_by(asc(Order.id))
         items = session.execute(query).all()
         if not items:
             return None

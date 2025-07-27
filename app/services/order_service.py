@@ -14,12 +14,14 @@ class OrderService(BaseService):
     def get_all(self,rol: str) -> List[OrderResponse] | None:
         if rol == "chef":
             state = ["pending","preparing"]
-        elif rol == "waiter":
-            state = ["pending","preparing","made"]
         else:
-            return super().get_all()
+            state = ["pending","preparing","made"]
         items =self.repo.get_all_filter(state=state)
         return self._to_base_models(items_db=items) if items else None
+    
+    def get_orders_to_bill(self) -> List[OrderResponse] | None:
+        items = self.repo.get_all_filter(state=["made","completed"])
+        return self._to_base_models(items_db=items)
     
     def create_one(self,order_request: OrderRequest) -> OrderDishesResponse | None:
         # table_id = order_request.table_id

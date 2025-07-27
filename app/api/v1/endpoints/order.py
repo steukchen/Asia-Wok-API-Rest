@@ -17,6 +17,16 @@ def get_orders(data: token_depend,service: OrderService = Depends()) -> List[Ord
     
     return JSONResponse(content=[order.model_dump() for order in orders_response], status_code=status.HTTP_200_OK)
 
+@router.get("/get_orders_to_bill",status_code=status.HTTP_200_OK)
+def get_orders_to_bill(service: OrderService = Depends()) -> List[OrderResponse]:
+    orders_response = service.get_orders_to_bill()
+    
+    if not orders_response:
+        raise HTTPException(detail="Orders not Found.",status_code=status.HTTP_404_NOT_FOUND)
+    
+    return JSONResponse(content=[order.model_dump() for order in orders_response], status_code=status.HTTP_200_OK)
+
+
 @router.get("/get_order_dishes/{id}",status_code=status.HTTP_200_OK)
 def get_order_dishes(id: int = Path(gt=0),service: OrderService = Depends()) -> OrderDishesResponse:
     order_response = service.get_one_with_dishes(order_id=id)
