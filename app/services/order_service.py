@@ -17,10 +17,14 @@ class OrderService(BaseService):
         else:
             state = ["pending","preparing","made"]
         items =self.repo.get_all_filter(state=state)
+        if not items:
+            return None
         return self._to_base_models(items_db=items) if items else None
     
     def get_orders_to_bill(self) -> List[OrderResponse] | None:
         items = self.repo.get_all_filter(state=["made","completed"])
+        if not items:
+            return None
         return self._to_base_models(items_db=items)
     
     def create_one(self,order_request: OrderRequest) -> OrderDishesResponse | None:

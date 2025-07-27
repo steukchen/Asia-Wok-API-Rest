@@ -71,7 +71,7 @@ class OrderDishesResponse(OrderResponse):
 
 class OrderBase(BaseModel):
     customer_id: int = None
-    order_date: datetime = datetime.now()
+    # order_date: datetime = datetime.now()
     created_by: str | None = None
     table_id: int
     notes: str | None = None
@@ -187,7 +187,7 @@ class OrderRequest(OrderBase,OrderDishesRequest):
     
 class OrderUpdate(OrderBase):
     customer_id: int = None
-    order_date: datetime = None
+    # order_date: datetime = None
     notes: str = None
     created_by: str = None
     table_id: int = None
