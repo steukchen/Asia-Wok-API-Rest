@@ -15,11 +15,11 @@ async def create_data():
     await create_structure()
     user_service = UserService()
     user = user_service.create_one(item_request=UserRequest(
-        username="HARSUE",
-        email="harsue0311@gmail.com",
+        username="ADMIN",
+        email="admin@asiawok.com",
         rol="admin",
         status=True,
-        password="Pass123.."
+        password="Admin123.."
     ))
     
     dish_type_service = DishTypeService()
