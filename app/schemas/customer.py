@@ -29,7 +29,7 @@ class CustomerRequest(BaseModel):
     ci: str
     name: str
     lastname: str
-    phone_number: str
+    phone_number: str | None = None
     address: str | None = None
     
     @field_validator("ci")
