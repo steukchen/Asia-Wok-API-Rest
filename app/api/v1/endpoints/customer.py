@@ -21,6 +21,14 @@ def get_customer_by_id(service: CustomerService = Depends(), id: int = Path(gt=0
         raise HTTPException(detail="Customer Not Found.",status_code=status.HTTP_404_NOT_FOUND)
     return JSONResponse(content=customer.model_dump(),status_code=status.HTTP_200_OK)
 
+@router.get("/get_customer_by_ci/{ci}",status_code=status.HTTP_200_OK)
+def get_customer_by_ci(service: CustomerService = Depends(), ci: str = Path(min_length=9)) -> CustomerResponse:
+    customer = service.get_one_by_column(column="ci",value=ci.upper())
+    if not customer:
+        raise HTTPException(detail="Customer Not Found.",status_code=status.HTTP_404_NOT_FOUND)
+    return JSONResponse(content=customer.model_dump(),status_code=status.HTTP_200_OK)
+
+
 @router.post("/create_customer",status_code=status.HTTP_201_CREATED)
 def create_customer(customer: CustomerRequest,service: CustomerService = Depends()) -> CustomerResponse:
     customer = service.create_one(item_request=customer)
