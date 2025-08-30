@@ -4,7 +4,7 @@ from .base import BaseID
 
 class Customer(BaseID):
     __tablename__ = "customers"
-    ci: Mapped[str] = mapped_column(VARCHAR(255),nullable=False)
+    ci: Mapped[str] = mapped_column(VARCHAR(255),nullable=False,unique=True)
     name: Mapped[str] = mapped_column(VARCHAR(255),nullable=False)
     lastname: Mapped[str] = mapped_column(VARCHAR(255),nullable=False)
     phone_number: Mapped[str] = mapped_column(VARCHAR(255))
