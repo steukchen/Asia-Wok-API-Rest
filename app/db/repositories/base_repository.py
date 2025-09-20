@@ -20,7 +20,7 @@ class BaseRepository:
     
     @session
     def get_one_by_column_primary(self,session: Session, value: any) -> Base | None:
-        query = select(self.base).where(getattr(self.base,self.column_primary) == value)
+        query = select(self.base).where(getattr(self.base,self.column_primary) == value, self.base.status==True)
         item = session.execute(query).fetchone()
         if not item:
             return None
@@ -28,7 +28,8 @@ class BaseRepository:
     
     @session
     def get_one_by_column(self,session: Session,column: str, value: any) -> Base | None:
-        query = select(self.base).where(getattr(self.base,column) == value)
+        query = select(self.base).where(getattr(self.base,column) == value, self.base.status==True)
+        print(query)
         item = session.execute(query).fetchone()
         if not item:
             return None

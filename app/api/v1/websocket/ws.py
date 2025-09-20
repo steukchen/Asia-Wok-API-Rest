@@ -16,15 +16,14 @@ def validate_ws_token(token:str) -> dict | None:
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    
-    ws_token = await websocket.receive_text()
-    data_user = validate_ws_token(ws_token)
-    if not data_user:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
-    
+
     try:
+        await websocket.accept()
+        ws_token = await websocket.receive_text()
+        data_user = validate_ws_token(ws_token)
+        if not data_user:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
         print(active_connections.get(data_user["id"]))
         if active_connections.get(data_user["id"]):
             await active_connections[data_user["id"]].send_json(data={

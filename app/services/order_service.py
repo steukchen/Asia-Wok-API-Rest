@@ -3,6 +3,7 @@ from .dish_service import DishService
 from .currency_service import CurrencyService
 from app.schemas.order import OrderResponse,OrderRequest,OrderDishesResponse,OrderDishResponse,OrderDishesRequest,OrderCurrenciesRequest,OrderCurrenciesResponse,OrderCurrencyResponse
 from app.schemas.table import TableResponse
+from app.schemas.customer import CustomerFrequent,CustomerResponse
 from app.db.repositories import OrderRepository
 from typing import List, Union
 from app.models import Order,Dish,DishType,Currency,Table
@@ -56,6 +57,12 @@ class OrderService(BaseService):
         else:
             state = ["pending","preparing","made"]
         items =self.repo.get_all_filter(state=state)
+        if not items:
+            return None
+        return self._to_base_models(items_db=items) if items else None
+    
+    def get_by_date_customer_state(self,begin_date: str = None,end_date: str = None,ci: str = None, state = None):
+        items = self.repo.get_by_date_customer_state(begin_date=begin_date,end_date=end_date,ci=ci,state=state)
         if not items:
             return None
         return self._to_base_models(items_db=items) if items else None
@@ -135,6 +142,26 @@ class OrderService(BaseService):
         
         return self._to_order_currencies_response(data=result)
     
+    def get_total_currencies_by_date(self,begin_date: str = None,end_date: str = None):
+        result = self.repo.get_total_currencies_by_date(begin_date=begin_date,end_date=end_date)
+        if not result:
+            return None
+        currency_service = CurrencyService()
+        return [OrderCurrencyResponse(
+            currency=currency_service._to_base_model(item_db=currency_detail[0]),
+            quantity=currency_detail[1]
+        ) for currency_detail in result]
+    
+    def get_total_dishes_by_date(self,begin_date: str = None,end_date: str = None):
+        result = self.repo.get_total_dishes_by_date(begin_date=begin_date,end_date=end_date)
+        if not result:
+            return None
+        dish_service = DishService()
+        return [OrderDishResponse(
+            dish=dish_service._to_base_model(item_db=[dish_detail[0],dish_detail[1]]),
+            quantity=dish_detail[2]
+        ) for dish_detail in result]
+    
     def _to_order_currencies_response(self,data: List[ Union[Union[Order,Table],List[Union[Currency,int]]] ]):
         if not data[1]:
             return OrderCurrenciesResponse(
@@ -170,3 +197,19 @@ class OrderService(BaseService):
                 quantity=currency_detail[1]
             ) for currency_detail in data[1]]
         )
+        
+    def get_frequent_customers_by_date(self, number: int = 10, begin_date: str = None, end_date: str = None) -> List[Union[CustomerResponse,int]] | None:
+        items = self.repo.get_frequent_customers_by_date(number=number,begin_date=begin_date,end_date=end_date)
+        if not items:
+            return None
+        return [CustomerFrequent(
+            customer=CustomerResponse(
+                id=customer_detail[0].id,
+                ci=customer_detail[0].ci,
+                name=customer_detail[0].name,
+                lastname=customer_detail[0].lastname,
+                phone_number=customer_detail[0].phone_number,
+                address=customer_detail[0].address
+            ),
+            total_orders=customer_detail[1]
+        ) for customer_detail in items]

@@ -1,10 +1,11 @@
-from app.models import Order,OrderDish,DishType,Dish,Currency,OrderCurrency,Table
+from app.models import Order,OrderDish,DishType,Dish,Currency,OrderCurrency,Table,Customer
 from .base_repository import BaseRepository
+from .customer_repository import CustomerRepository
 from app.db import session,ExceptionRepository
 from sqlalchemy.orm import Session
 from typing import List,Union
-from sqlalchemy import select,desc,asc,text
-from sqlalchemy.sql.functions import sum
+from sqlalchemy import select,desc,asc,text,cast,Date
+from sqlalchemy.sql.functions import sum,count
 
 class OrderRepository(BaseRepository):
     def __init__(self):
@@ -17,6 +18,28 @@ class OrderRepository(BaseRepository):
         if not items:
             return None
         
+        return items
+
+    @session
+    def get_by_date_customer_state(self,session: Session, begin_date: str=None,end_date: str = None, ci: str=None, state: str=None) -> List[Union[Order,Table]] | None:
+        customer = None
+        if ci:
+            customer = CustomerRepository().get_one_by_column(session=session,column="ci",value=ci)
+            if not customer:
+                return None
+        query = (select(Order,Table).join(Table,Order.table_id==Table.id)
+        .where(
+                cast(Order.order_date,Date)>=begin_date if begin_date else text(""),
+                cast(Order.order_date,Date)<=end_date if end_date else text(""),
+                Order.customer_id == customer.id if customer else text(""),
+                Order.state == state if state else text(""),
+                Order.status==True
+            )
+        .order_by(asc(Order.order_date)))
+        
+        items = session.execute(query).all()
+        if not items:
+            return None
         return items
     
     @session
@@ -44,16 +67,16 @@ class OrderRepository(BaseRepository):
     
     @session 
     def add_dishes(self,session: Session,order_id: int,dishes_data: List[List[int]]) -> bool:
+        
         if bool(tuple(filter(lambda x: x[1] <= 0,dishes_data))):
             raise ExceptionRepository(message="Invalid quantity",code=409)
 
         dishes_ids = [i[0] for i in dishes_data]
-        dishes_ids.sort()
         
         query = (
             select(Dish)
             .where(Dish.id.in_(dishes_ids),Dish.status==True)
-            .order_by(desc(Dish.id))
+            .order_by(asc(Dish.id))
         )
         dishes_db = session.execute(query).fetchall()
         
@@ -61,8 +84,8 @@ class OrderRepository(BaseRepository):
             session.rollback()
             raise ExceptionRepository(message="Invalid Dishes",code=409)
         
+        dishes_data.sort(key=lambda x: x[0])
         dishes_result = [[d,dt[1]] for d,dt in zip(dishes_db,dishes_data)]
-        
         order_dishes_db = [OrderDish(
             order_id = order_id,
             dish_id= dish[0][0].id,
@@ -169,19 +192,18 @@ class OrderRepository(BaseRepository):
             raise ExceptionRepository(message="Invalid quantity",code=409)
 
         currencies_ids = [i[0] for i in currencies_data]
-        currencies_ids.sort()
         
         query = (
             select(Currency)
             .where(Currency.id.in_(currencies_ids),Currency.status==True)
-            .order_by(desc(Currency.id))
+            .order_by(asc(Currency.id))
         )
         currencies_db = session.execute(query).fetchall()
-        
         if len(currencies_db) != len(currencies_data):
             session.rollback()
             raise ExceptionRepository(message="Invalid Currencies",code=409)
         
+        currencies_data.sort(key=lambda x: x[0])
         currencies_result = [[c,ct[1]] for c,ct in zip(currencies_db,currencies_data)]
         
         order_currencies_db = [OrderCurrency(
@@ -236,3 +258,69 @@ class OrderRepository(BaseRepository):
         item = self.get_one_with_table_by_column_primary(session=session,value=value)
         
         return item
+    
+    @session
+    def get_total_currencies_by_date(self,session: Session, begin_date: str=None,end_date: str = None) -> List[Union[Currency,int]] | None:
+        query = (
+                select(Currency,sum(OrderCurrency.quantity))
+                .join(Currency,Currency.id==OrderCurrency.currency_id)
+                .join(Order,Order.id==OrderCurrency.order_id)
+                .where(
+                    cast(Order.order_date,Date)>=begin_date if begin_date else text(""),
+                    cast(Order.order_date,Date)<=end_date if end_date else text(""),
+                    Order.status==True
+                )
+                .group_by(Currency.id)
+                .order_by(asc(Currency.id))
+        )
+        
+        result = list(session.execute(query).fetchall())
+        
+        if not result:
+            return None
+        
+        return result
+    
+    @session
+    def get_total_dishes_by_date(self,session: Session, begin_date: str=None,end_date: str = None) -> List[Union[Dish,DishType,int]] | None:
+        query = (
+                select(Dish,DishType,sum(OrderDish.quantity))
+                .join(Dish,Dish.id==OrderDish.dish_id)
+                .join(DishType,Dish.type_id==DishType.id)
+                .join(Order,Order.id==OrderDish.order_id)
+                .where(
+                    cast(Order.order_date,Date)>=begin_date if begin_date else text(""),
+                    cast(Order.order_date,Date)<=end_date if end_date else text(""),
+                    Order.status==True
+                )
+                .group_by(Dish.id,DishType.id)
+                .order_by(desc(sum(OrderDish.quantity)))
+        )
+        
+        result = list(session.execute(query).fetchall())
+        
+        if not result:
+            return None
+        
+        return result
+    
+    @session
+    def get_frequent_customers_by_date(self,session: Session, number: int = 10,begin_date: str = None, end_date: str = None) -> List[Union[Customer,int]] | None:
+        query = (
+                select(Customer,count(Order.id))
+                .join(Order,Order.customer_id==Customer.id)
+                .where(
+                    cast(Order.order_date,Date)>=begin_date if begin_date else text(""),
+                    cast(Order.order_date,Date)<=end_date if end_date else text(""),
+                    Order.status==True
+                )
+                .group_by(Customer.id)
+                .order_by(desc(count(Order.id)))
+                .limit(number)
+        )
+        result = list(session.execute(query).fetchall())
+        
+        if not result:
+            return None
+        
+        return result

@@ -1,9 +1,10 @@
-from pydantic import BaseModel, field_validator,field_serializer
-from datetime import datetime
+from pydantic import BaseModel, field_validator,field_serializer,model_validator
+from datetime import date,datetime
 from .dish import DishResponse
 from .currency import CurrencyResponse
 from .table import TableResponse
 from typing import List
+from re import match
 
 class OrderResponse(BaseModel):
     id: int
@@ -247,3 +248,53 @@ class OrderCurrenciesResponse(OrderResponse):
                 }
             }
     }
+    
+
+class OrdersDateFilter(BaseModel):
+    begin_date: date
+    end_date: date 
+    
+class OrdersFilter(BaseModel):
+    begin_date: date = None
+    end_date: date = date.today()
+    ci: str = None
+    state: str = None
+    
+    @field_validator("ci")
+    def validate_ci(cls,value:str):
+        value = value.upper()
+        regex = r"^[A-Z]-\d{7,8}$"
+        if not bool(match(regex,value)):
+            raise ValueError("The CI does not comply with the appropriate format")
+        return value
+    
+    @field_validator("state")
+    def validate_state(cls,value: str) -> str:
+        value = value.lower()
+        states = 'pending','preparing','made','completed','cancelled'
+        if value not in states:
+            raise ValueError("Invalid State.")
+        
+        return value
+    
+    @field_validator('end_date')
+    def validate_end_date(cls, v:date,info) -> date:
+        begin_date = info.data['begin_date']
+        
+        if begin_date is None:
+            return None
+        if v < begin_date:
+            raise ValueError('begin_date must be less than end_date')
+        return v
+    
+    @model_validator(mode='after')
+    def check_at_least_one_filter(cls, values):
+        # Verificamos que al menos uno de los campos no sea None
+        data = values.model_dump().values()
+        if all(value is None for value in data):
+            raise ValueError('At least one filter must be provided')
+        return values
+    
+
+class CustomerDateFilter(OrdersDateFilter):
+    number: int = 10

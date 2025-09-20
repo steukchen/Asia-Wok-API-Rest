@@ -1,7 +1,7 @@
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Enum,TIMESTAMP,text,INTEGER,Boolean
 from sqlalchemy.orm import Mapped,mapped_column
-from app.db.session import engine
+from app.db.session import engine,SessionLocal
 
 DeclarativeBase = declarative_base()
 
@@ -22,11 +22,11 @@ order_states = Enum('pending','preparing','made','completed','cancelled',name="o
 
 async def create_structure():
     DeclarativeBase.metadata.create_all(bind=engine)
-    # with open("SQL/functions.sql","r") as file:
-    #     sql = text(file.read())
+    with open("SQL/functions.sql","r") as file:
+        sql = text(file.read())
     
-    # with SessionLocal() as session:
-    #     session.execute(sql)
-    #     session.commit()
+    with SessionLocal() as session:
+        session.execute(sql)
+        session.commit()
     print("Database structure created")
     

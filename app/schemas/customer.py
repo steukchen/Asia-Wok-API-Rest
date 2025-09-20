@@ -75,3 +75,8 @@ class CustomerUpdate(CustomerRequest):
     lastname: str = None
     phone_number: str = None
     address: str | None = None
+    
+
+class CustomerFrequent(BaseModel):
+    customer: CustomerResponse
+    total_orders: int
