@@ -13,7 +13,12 @@ class OrderRepository(BaseRepository):
     
     @session
     def get_all_filter(self,session: Session,state:List[str]) -> List[Union[Order,Table]] | None:
-        query = select(Order,Table).join(Table,Order.table_id==Table.id).where(Order.state.in_(state), text("date(orders.order_date)=date(NOW())"),Order.status==True).order_by(asc(Order.id))
+        query = select(Order,Table).join(Table,Order.table_id==Table.id).where(
+            Order.state.in_(state),
+            text("date(order_date AT TIME ZONE 'America/Caracas') = date(NOW() AT TIME ZONE 'America/Caracas')"),
+            Order.status==True
+            ).order_by(asc(Order.id))
+        
         items = session.execute(query).all()
         if not items:
             return None
@@ -29,14 +34,14 @@ class OrderRepository(BaseRepository):
                 return None
         query = (select(Order,Table).join(Table,Order.table_id==Table.id)
         .where(
-                cast(Order.order_date,Date)>=begin_date if begin_date else text(""),
-                cast(Order.order_date,Date)<=end_date if end_date else text(""),
+                text(f"date(order_date AT TIME ZONE 'America/Caracas') >= '{begin_date}'") if begin_date else text(""),
+                text(f"date(order_date AT TIME ZONE 'America/Caracas') <= '{end_date}'") if end_date else text(""),
                 Order.customer_id == customer.id if customer else text(""),
                 Order.state == state if state else text(""),
                 Order.status==True
             )
         .order_by(asc(Order.order_date)))
-        
+        print(query)
         items = session.execute(query).all()
         if not items:
             return None
@@ -266,8 +271,8 @@ class OrderRepository(BaseRepository):
                 .join(Currency,Currency.id==OrderCurrency.currency_id)
                 .join(Order,Order.id==OrderCurrency.order_id)
                 .where(
-                    cast(Order.order_date,Date)>=begin_date if begin_date else text(""),
-                    cast(Order.order_date,Date)<=end_date if end_date else text(""),
+                    text(f"date(order_date AT TIME ZONE 'America/Caracas') >= '{begin_date}'") if begin_date else text(""),
+                    text(f"date(order_date AT TIME ZONE 'America/Caracas') <= '{end_date}'") if end_date else text(""),
                     Order.status==True
                 )
                 .group_by(Currency.id)
@@ -289,8 +294,8 @@ class OrderRepository(BaseRepository):
                 .join(DishType,Dish.type_id==DishType.id)
                 .join(Order,Order.id==OrderDish.order_id)
                 .where(
-                    cast(Order.order_date,Date)>=begin_date if begin_date else text(""),
-                    cast(Order.order_date,Date)<=end_date if end_date else text(""),
+                    text(f"date(order_date AT TIME ZONE 'America/Caracas') >= '{begin_date}'") if begin_date else text(""),
+                    text(f"date(order_date AT TIME ZONE 'America/Caracas') <= '{end_date}'") if end_date else text(""),
                     Order.status==True
                 )
                 .group_by(Dish.id,DishType.id)
@@ -310,8 +315,8 @@ class OrderRepository(BaseRepository):
                 select(Customer,count(Order.id))
                 .join(Order,Order.customer_id==Customer.id)
                 .where(
-                    cast(Order.order_date,Date)>=begin_date if begin_date else text(""),
-                    cast(Order.order_date,Date)<=end_date if end_date else text(""),
+                    text(f"date(order_date AT TIME ZONE 'America/Caracas') >= '{begin_date}'") if begin_date else text(""),
+                    text(f"date(order_date AT TIME ZONE 'America/Caracas') <= '{end_date}'") if end_date else text(""),
                     Order.status==True
                 )
                 .group_by(Customer.id)

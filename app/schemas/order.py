@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator,field_serializer,model_validator
-from datetime import date,datetime
+from datetime import date,datetime,timedelta,timezone
 from .dish import DishResponse
 from .currency import CurrencyResponse
 from .table import TableResponse
@@ -18,6 +18,11 @@ class OrderResponse(BaseModel):
     @field_validator("created_by",mode="before")
     def validate_id(cls,value):
         return str(value)
+    
+    # Tranformar a hora caracas
+    @field_validator("order_date")
+    def validate_order_date(cls,value: datetime):
+        return value.astimezone(timezone(timedelta(hours=-4)))
     
     @field_serializer("order_date")
     def serialize_order_date(self,value: datetime):
@@ -256,7 +261,7 @@ class OrdersDateFilter(BaseModel):
     
 class OrdersFilter(BaseModel):
     begin_date: date = None
-    end_date: date = date.today()
+    end_date: date = None
     ci: str = None
     state: str = None
     
@@ -279,10 +284,14 @@ class OrdersFilter(BaseModel):
     
     @field_validator('end_date')
     def validate_end_date(cls, v:date,info) -> date:
+        if v is None:
+            return None
         begin_date = info.data['begin_date']
         
         if begin_date is None:
             return None
+    
+        
         if v < begin_date:
             raise ValueError('begin_date must be less than end_date')
         return v
