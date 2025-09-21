@@ -29,7 +29,6 @@ class BaseRepository:
     @session
     def get_one_by_column(self,session: Session,column: str, value: any) -> Base | None:
         query = select(self.base).where(getattr(self.base,column) == value, self.base.status==True)
-        print(query)
         item = session.execute(query).fetchone()
         if not item:
             return None

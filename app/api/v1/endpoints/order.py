@@ -28,7 +28,6 @@ def get_orders_by_date_customer_state(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid rol"
         )
-    print(filters)
     orders_response = service.get_by_date_customer_state(begin_date=filters.begin_date,end_date=filters.end_date,ci=filters.ci,state=filters.state)
     
     if not orders_response:
@@ -91,7 +90,6 @@ def update_order(order_update: OrderUpdate,id: int = Path(), service: OrderServi
 @router.put("/update_dishes/{id}",status_code=status.HTTP_200_OK)
 def update_dishes(dishes: OrderDishesRequest,id: int = Path(gt=0),service: OrderService = Depends()) -> OrderResponse:
     
-    print(dishes)
     order = service.update_dishes(order_id=id,dishes=dishes)
     
     if not order:
@@ -147,7 +145,6 @@ def get_total_dishes_by_date(
 @router.get("/get_frequent_customers_by_date",status_code=status.HTTP_200_OK)
 def get_frequent_customers_by_date(dates: CustomerDateFilter = Query(), service: OrderService = Depends()):
     customers_response = service.get_frequent_customers_by_date(number=dates.number,begin_date=dates.begin_date,end_date=dates.end_date)
-    print(customers_response)
     if not customers_response:
         raise HTTPException(detail="Customers not Found.",status_code=status.HTTP_404_NOT_FOUND)
     

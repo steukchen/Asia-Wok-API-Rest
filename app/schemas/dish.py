@@ -9,7 +9,6 @@ class DishTypeResponse(BaseModel):
     
     # @field_serializer("created_at","updated_at")
     # def serialize_created_at(self,value: datetime):
-    #     print(value)
     #     return value.strftime("%d/%m/%Y, %H:%M:%S")
     
     model_config = {
